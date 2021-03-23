@@ -1,0 +1,41 @@
+version: '2.3'
+
+services:
+  database:
+    container_name: 'Projecto_database'
+    restart: always
+    image: postgres:12
+    volumes:
+      - ./database-data:/var/lib/data/
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=passw0rd
+      - POSTGRES_DB=apidb
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres-compose-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d apidb -U admin -h 0.0.0.0 -p 5432"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "pgadmin@pgadmin4.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "16543:80"
+    depends_on:
+      - database
+    networks:
+      - postgres-compose-network
+
+volumes:
+  database-data:
+
+networks: 
+  postgres-compose-network:
+    driver: bridge
